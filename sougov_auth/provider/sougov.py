@@ -22,8 +22,8 @@ class SougovAuth:
         self.callback_url = callback_url
         self.response = self.__auth()
         keys = self.__process_to_claims()
-        self.user_info_access = self.__decode_access_token(keys, self.response['access_token'])
-        self.user_info_id = self.__decode_access_token(keys, self.response['id_token'])
+        self.user_info_access = self.__decode_token(keys, self.response['access_token'])
+        self.user_info_id = self.__decode_token(keys, self.response['id_token'])
 
 
     @handle_http_errors
@@ -49,20 +49,9 @@ class SougovAuth:
         result = response.json()
         return result['keys'][0]
 
-    def __decode_access_token(self, keys, access_token):
-        keys = self.__process_to_claims()
+    def __decode_token(self, keys, token):
         result = jwt.decode(
-            jwt=access_token, 
-            key=keys['n'], 
-            algorithms=[keys['alg']],
-            headers={"kid": keys["kid"], "kty": keys["kty"], "e": keys["e"]}
-        )
-        return result
-
-    def __decode_id_token(self, keys, id_token):
-        keys = self.__process_to_claims()
-        result = jwt.decode(
-            jwt=id_token, 
+            jwt=token, 
             key=keys['n'], 
             algorithms=[keys['alg']],
             headers={"kid": keys["kid"], "kty": keys["kty"], "e": keys["e"]}
